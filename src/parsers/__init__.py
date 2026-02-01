@@ -1,7 +1,7 @@
 """
-解析器模块
+Parser Module
 
-提供多种文档格式的解析能力
+Provides document parsing capabilities for multiple formats
 """
 
 from .base_parser import BaseParser

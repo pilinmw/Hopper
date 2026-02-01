@@ -1,7 +1,7 @@
 """
-解析器基类
+Base Parser
 
-定义所有文档解析器的统一接口
+Defines unified interface for all document parsers
 """
 
 from abc import ABC, abstractmethod
@@ -12,30 +12,30 @@ from datetime import datetime
 
 
 class BaseParser(ABC):
-    """文档解析器抽象基类"""
+    """Abstract base class for document parsers"""
     
     def __init__(self, file_path: str):
         """
-        初始化解析器
+        Initialize parser
         
         Args:
-            file_path: 文件路径
+            file_path: Path to the file
         """
         self.file_path = Path(file_path)
         
         if not self.file_path.exists():
-            raise FileNotFoundError(f"文件不存在: {file_path}")
+            raise FileNotFoundError(f"File not found: {file_path}")
     
     @abstractmethod
     def parse(self) -> Dict[str, Any]:
         """
-        解析文档，返回标准化数据结构
+        Parse document and return standardized data structure
         
         Returns:
             {
-                'metadata': {...},     # 文件元数据
-                'content': {...},      # 内容（文本、表格等）
-                'metrics': {...}       # 统计指标
+                'metadata': {...},     # File metadata
+                'content': {...},      # Content (text, tables, etc.)
+                'metrics': {...}       # Statistical metrics
             }
         """
         pass
@@ -43,29 +43,29 @@ class BaseParser(ABC):
     @abstractmethod
     def extract_text(self) -> str:
         """
-        提取纯文本内容
+        Extract plain text content
         
         Returns:
-            文档的纯文本内容
+            Plain text content of the document
         """
         pass
     
     @abstractmethod
     def extract_tables(self) -> List[pd.DataFrame]:
         """
-        提取所有表格
+        Extract all tables
         
         Returns:
-            表格列表（DataFrame 格式）
+            List of tables (DataFrame format)
         """
         pass
     
     def get_metadata(self) -> Dict[str, Any]:
         """
-        获取文件元数据
+        Get file metadata
         
         Returns:
-            包含文件信息的字典
+            Dictionary containing file information
         """
         stat = self.file_path.stat()
         
@@ -81,10 +81,10 @@ class BaseParser(ABC):
     
     def get_format(self) -> str:
         """
-        获取文件格式
+        Get file format
         
         Returns:
-            文件格式名称
+            File format name
         """
         ext_to_format = {
             '.xlsx': 'excel',

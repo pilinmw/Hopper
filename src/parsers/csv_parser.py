@@ -1,7 +1,7 @@
 """
-CSV 文件解析器
+CSV File Parser
 
-支持自动编码检测和标准化数据输出
+Supports automatic encoding detection and standardized data output
 """
 
 import pandas as pd
@@ -12,14 +12,14 @@ from .base_parser import BaseParser
 
 
 class CSVParser(BaseParser):
-    """CSV 文件解析器"""
+    """CSV file parser"""
     
     def __init__(self, file_path: str):
         """
-        初始化 CSV 解析器
+        Initialize CSV parser
         
         Args:
-            file_path: CSV 文件路径
+            file_path: Path to CSV file
         """
         super().__init__(file_path)
         self.encoding = self._detect_encoding()
@@ -27,33 +27,33 @@ class CSVParser(BaseParser):
     
     def _detect_encoding(self) -> str:
         """
-        自动检测文件编码
+        Auto-detect file encoding
         
         Returns:
-            编码名称（如 'utf-8', 'gbk'）
+            Encoding name (e.g. 'utf-8', 'gbk')
         """
         with open(self.file_path, 'rb') as f:
-            # 读取前 10000 字节用于检测
+            # Read first 10000 bytes for detection
             raw_data = f.read(10000)
             result = chardet.detect(raw_data)
             detected_encoding = result['encoding']
             
-            print(f"  🔍 检测到编码: {detected_encoding} (置信度: {result['confidence']:.2%})")
+            print(f"  🔍 Detected encoding: {detected_encoding} (confidence: {result['confidence']:.2%})")
             
             return detected_encoding or 'utf-8'
     
     def _load_dataframe(self) -> pd.DataFrame:
-        """加载 DataFrame（懒加载）"""
+        """Load DataFrame (lazy loading)"""
         if self._df is None:
             try:
                 self._df = pd.read_csv(
                     self.file_path,
                     encoding=self.encoding,
-                    encoding_errors='replace'  # 遇到无法解码的字符时替换
+                    encoding_errors='replace'  # Replace undecodable characters
                 )
             except Exception as e:
-                # 如果失败，尝试使用 UTF-8
-                print(f"  ⚠️  使用 {self.encoding} 失败，尝试 UTF-8")
+                # If failed, try UTF-8
+                print(f"  ⚠️  Failed with {self.encoding}, trying UTF-8")
                 self._df = pd.read_csv(
                     self.file_path,
                     encoding='utf-8',
@@ -64,10 +64,10 @@ class CSVParser(BaseParser):
     
     def parse(self) -> Dict[str, Any]:
         """
-        解析 CSV 文件
+        Parse CSV file
         
         Returns:
-            标准化数据结构
+            Standardized data structure
         """
         df = self._load_dataframe()
         
@@ -93,31 +93,31 @@ class CSVParser(BaseParser):
     
     def extract_text(self) -> str:
         """
-        提取纯文本
+        Extract plain text
         
         Returns:
-            CSV 内容的字符串表示
+            String representation of CSV content
         """
         df = self._load_dataframe()
         return df.to_string(index=False)
     
     def extract_tables(self) -> List[pd.DataFrame]:
         """
-        提取表格
+        Extract tables
         
         Returns:
-            包含一个 DataFrame 的列表
+            List containing a single DataFrame
         """
         df = self._load_dataframe()
         return [df]
 
 
 def main():
-    """测试函数"""
+    """Test function"""
     import sys
     
     if len(sys.argv) < 2:
-        print("用法: python csv_parser.py <csv文件路径>")
+        print("Usage: python csv_parser.py <csv_file_path>")
         return
     
     file_path = sys.argv[1]
@@ -125,12 +125,12 @@ def main():
     parser = CSVParser(file_path)
     data = parser.parse()
     
-    print(f"\n✅ 解析成功:")
-    print(f"  - 文件: {data['metadata']['file_name']}")
-    print(f"  - 大小: {data['metadata']['file_size_mb']} MB")
-    print(f"  - 行数: {data['metrics']['row_count']}")
-    print(f"  - 列数: {data['metrics']['column_count']}")
-    print(f"  - 编码: {data['content']['structure']['encoding']}")
+    print(f"\n✅ Parsing successful:")
+    print(f"  - File: {data['metadata']['file_name']}")
+    print(f"  - Size: {data['metadata']['file_size_mb']} MB")
+    print(f"  - Rows: {data['metrics']['row_count']}")
+    print(f"  - Columns: {data['metrics']['column_count']}")
+    print(f"  - Encoding: {data['content']['structure']['encoding']}")
 
 
 if __name__ == '__main__':

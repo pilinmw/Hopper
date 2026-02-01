@@ -1,10 +1,10 @@
 """
-Excel 解析器模块
+Excel Parser Module
 
-功能：
-1. 读取 Excel 文件
-2. 提取关键数据和指标
-3. 处理合并单元格和格式
+Features:
+1. Read Excel files
+2. Extract key data and metrics
+3. Handle merged cells and formatting
 """
 
 import pandas as pd
@@ -14,14 +14,14 @@ from .base_parser import BaseParser
 
 
 class ExcelParser(BaseParser):
-    """Excel 数据解析器"""
+    """Excel data parser"""
     
     def __init__(self, file_path: str):
         """
-        初始化解析器
+        Initialize parser
         
         Args:
-            file_path: Excel 文件路径
+            file_path: Path to Excel file
         """
         super().__init__(file_path)
         self.workbook = None
@@ -29,19 +29,19 @@ class ExcelParser(BaseParser):
         
     def parse(self) -> Dict[str, Any]:
         """
-        解析 Excel 文件，返回标准化数据结构
+        Parse Excel file and return standardized data structure
         
         Returns:
-            标准化数据字典
+            Standardized data dictionary
         """
-        # 读取所有工作表
+        # Load all sheets
         self._load_sheets()
         
-        # 获取第一个工作表
+        # Get first sheet
         first_sheet = list(self.data.keys())[0] if self.data else None
         df = self.data.get(first_sheet) if first_sheet else pd.DataFrame()
         
-        # 提取指标
+        # Extract metrics
         metrics = self.extract_metrics(first_sheet)
         
         return {
@@ -52,7 +52,7 @@ class ExcelParser(BaseParser):
                 'structure': {
                     'sheet_names': list(self.data.keys()),
                     'sheet_count': len(self.data)
-                }
+                 }
             },
             'metrics': {
                 'sheet_count': len(self.data),
@@ -63,10 +63,10 @@ class ExcelParser(BaseParser):
         }
     
     def _load_sheets(self):
-        """内部方法：加载所有工作表"""
+        """Internal method: load all sheets"""
         if not self.data:
             if not self.file_path.exists():
-                raise FileNotFoundError(f"文件不存在: {self.file_path}")
+                raise FileNotFoundError(f"File not found: {self.file_path}")
             
             excel_file = pd.ExcelFile(self.file_path)
             for sheet_name in excel_file.sheet_names:
@@ -79,10 +79,10 @@ class ExcelParser(BaseParser):
     
     def extract_text(self) -> str:
         """
-        提取纯文本
+        Extract plain text
         
         Returns:
-            Excel 内容的字符串表示
+            String representation of Excel content
         """
         self._load_sheets()
         text_parts = []
@@ -92,25 +92,25 @@ class ExcelParser(BaseParser):
     
     def extract_tables(self) -> List[pd.DataFrame]:
         """
-        提取所有表格（每个工作表是一个表格）
+        Extract all tables (each sheet is a table)
         
         Returns:
-            表格列表
+            List of tables
         """
         self._load_sheets()
         return list(self.data.values())
     
     def parse_old(self) -> Dict[str, Any]:
         """
-        解析 Excel 文件，提取结构化数据
+        Parse Excel file and extract structured data
         
         Returns:
-            包含解析后数据的字典
+            Dictionary containing parsed data
         """
         if not self.file_path.exists():
-            raise FileNotFoundError(f"文件不存在: {self.file_path}")
+            raise FileNotFoundError(f"File not found: {self.file_path}")
         
-        # 读取所有工作表
+        # Read all sheets
         excel_file = pd.ExcelFile(self.file_path)
         
         for sheet_name in excel_file.sheet_names:
@@ -125,17 +125,17 @@ class ExcelParser(BaseParser):
     
     def extract_metrics(self, sheet_name: str = None) -> Dict[str, Any]:
         """
-        提取关键指标（针对金融报表场景）
+        Extract key metrics (for financial report scenarios)
         
         Args:
-            sheet_name: 工作表名称，默认使用第一个表
+            sheet_name: Sheet name, defaults to first sheet
             
         Returns:
-            包含关键指标的字典
+            Dictionary containing key metrics
         """
         self._load_sheets()
         
-        # 使用第一个工作表
+        # Use first sheet
         if sheet_name is None:
             sheet_name = list(self.data.keys())[0] if self.data else None
         
@@ -152,7 +152,7 @@ class ExcelParser(BaseParser):
             'summary': {}
         }
         
-        # 提取数值列的统计信息
+        # Extract statistics for numeric columns
         numeric_cols = df.select_dtypes(include=['number']).columns
         for col in numeric_cols:
             metrics['summary'][col] = {
@@ -166,10 +166,10 @@ class ExcelParser(BaseParser):
     
     def get_dataframe(self, sheet_name: str = None) -> pd.DataFrame:
         """
-        获取指定工作表的 DataFrame
+        Get DataFrame for specified sheet
         
         Args:
-            sheet_name: 工作表名称
+            sheet_name: Sheet name
             
         Returns:
             pandas DataFrame
@@ -183,17 +183,17 @@ class ExcelParser(BaseParser):
 
 
 def main():
-    """测试函数"""
-    # 示例用法
+    """Test function"""
+    # Sample usage
     parser = ExcelParser('data/input/sample.xlsx')
     data = parser.parse()
-    print(f"✅ 成功解析 {len(data)} 个工作表")
+    print(f"✅ Successfully parsed {len(data)} sheets")
     
     metrics = parser.extract_metrics()
-    print(f"\n📊 关键指标:")
-    print(f"  - 行数: {metrics['row_count']}")
-    print(f"  - 列数: {metrics['column_count']}")
-    print(f"  - 列名: {metrics['columns']}")
+    print(f"\n📊 Key metrics:")
+    print(f"  - Rows: {metrics['row_count']}")
+    print(f"  - Columns: {metrics['column_count']}")
+    print(f"  - Column names: {metrics['columns']}")
 
 
 if __name__ == '__main__':

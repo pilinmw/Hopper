@@ -1,7 +1,7 @@
 """
-Word 文档解析器
+Word Document Parser
 
-支持提取文本、表格和段落结构
+Supports text and table extraction with paragraph structure analysis
 """
 
 from docx import Document
@@ -12,24 +12,24 @@ from .base_parser import BaseParser
 
 
 class WordParser(BaseParser):
-    """Word 文档解析器"""
+    """Word document parser"""
     
     def __init__(self, file_path: str):
         """
-        初始化 Word 解析器
+        Initialize Word parser
         
         Args:
-            file_path: Word 文件路径
+            file_path: Path to Word file
         """
         super().__init__(file_path)
         self.doc = Document(str(self.file_path))
     
     def parse(self) -> Dict[str, Any]:
         """
-        解析 Word 文档
+        Parse Word document
         
         Returns:
-            标准化数据结构
+            Standardized data structure
         """
         text = self.extract_text()
         tables = self.extract_tables()
@@ -56,65 +56,65 @@ class WordParser(BaseParser):
     
     def extract_text(self) -> str:
         """
-        提取所有文本内容
+        Extract all text content
         
         Returns:
-            文档的纯文本
+            Plain text from document
         """
         paragraphs = []
         
         for para in self.doc.paragraphs:
             text = para.text.strip()
-            if text:  # 忽略空段落
+            if text:  # Ignore empty paragraphs
                 paragraphs.append(text)
         
         return '\n'.join(paragraphs)
     
     def extract_tables(self) -> List[pd.DataFrame]:
         """
-        提取所有表格
+        Extract all tables
         
         Returns:
-            表格列表（DataFrame 格式）
+            List of tables (DataFrame format)
         """
         tables = []
         
         for table_idx, table in enumerate(self.doc.tables):
-            # 提取表格数据
+            # Extract table data
             data = []
             for row in table.rows:
                 row_data = [cell.text.strip() for cell in row.cells]
                 data.append(row_data)
             
             if not data or len(data) < 2:
-                continue  # 跳过空表格或只有一行的表格
+                continue  # Skip empty tables or single-row tables
             
             try:
-                # 第一行作为表头
+                # First row as header
                 headers = data[0]
                 rows = data[1:]
                 
-                # 创建 DataFrame
+                # Create DataFrame
                 df = pd.DataFrame(rows, columns=headers)
                 
-                # 添加表格索引信息
+                # Add table index information
                 df.attrs['table_index'] = table_idx
                 df.attrs['source'] = 'word_document'
                 
                 tables.append(df)
                 
             except Exception as e:
-                print(f"  ⚠️  表格 {table_idx + 1} 解析失败: {e}")
+                print(f"  ⚠️  Table {table_idx + 1} parsing failed: {e}")
                 continue
         
         return tables
     
     def extract_headings(self) -> List[Dict[str, Any]]:
         """
-        提取标题结构
+        Extract heading structure
         
         Returns:
-            标题列表，包含级别和内容
+            List of headings with level and content
         """
         headings = []
         
@@ -130,11 +130,11 @@ class WordParser(BaseParser):
 
 
 def main():
-    """测试函数"""
+    """Test function"""
     import sys
     
     if len(sys.argv) < 2:
-        print("用法: python word_parser.py <docx文件路径>")
+        print("Usage: python word_parser.py <docx_file_path>")
         return
     
     file_path = sys.argv[1]
@@ -142,19 +142,19 @@ def main():
     parser = WordParser(file_path)
     data = parser.parse()
     
-    print(f"\n✅ 解析成功:")
-    print(f"  - 文件: {data['metadata']['file_name']}")
-    print(f"  - 大小: {data['metadata']['file_size_mb']} MB")
-    print(f"  - 段落数: {data['metrics']['paragraph_count']}")
-    print(f"  - 表格数: {data['metrics']['table_count']}")
-    print(f"  - 字数: {data['metrics']['word_count']}")
+    print(f"\n✅ Parsing successful:")
+    print(f"  - File: {data['metadata']['file_name']}")
+    print(f"  - Size: {data['metadata']['file_size_mb']} MB")
+    print(f"  - Paragraphs: {data['metrics']['paragraph_count']}")
+    print(f"  - Tables: {data['metrics']['table_count']}")
+    print(f"  - Words: {data['metrics']['word_count']}")
     
-    # 显示前 500 字符
+    # Show first 500 characters
     text = data['content']['text']
     if len(text) > 500:
-        print(f"\n📝 内容预览:\n{text[:500]}...")
+        print(f"\n📝 Content preview:\n{text[:500]}...")
     else:
-        print(f"\n📝 内容:\n{text}")
+        print(f"\n📝 Content:\n{text}")
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 """
-解析器工厂类
+Parser Factory
 
-根据文件类型自动选择合适的解析器
+Automatically selects appropriate parser based on file type
 """
 
 from pathlib import Path
@@ -14,9 +14,9 @@ from .base_parser import BaseParser
 
 
 class ParserFactory:
-    """解析器工厂类 - 自动选择合适的解析器"""
+    """Parser factory class - automatically selects the appropriate parser"""
     
-    # 文件扩展名到解析器的映射
+    # File extension to parser mapping
     PARSERS = {
         '.xlsx': ExcelParser,
         '.xls': ExcelParser,
@@ -29,22 +29,22 @@ class ParserFactory:
     @staticmethod
     def create_parser(file_path: str) -> BaseParser:
         """
-        根据文件扩展名自动创建解析器
+        Automatically create parser based on file extension
         
         Args:
-            file_path: 文件路径
+            file_path: File path
             
         Returns:
-            对应的解析器实例
+            Corresponding parser instance
             
         Raises:
-            FileNotFoundError: 文件不存在
-            ValueError: 不支持的文件格式
+            FileNotFoundError: File does not exist
+            ValueError: Unsupported file format
         """
         path = Path(file_path)
         
         if not path.exists():
-            raise FileNotFoundError(f"文件不存在: {file_path}")
+            raise FileNotFoundError(f"File not found: {file_path}")
         
         ext = path.suffix.lower()
         
@@ -53,69 +53,69 @@ class ParserFactory:
         if parser_class is None:
             supported = ', '.join(ParserFactory.PARSERS.keys())
             raise ValueError(
-                f"不支持的文件格式: {ext}\n"
-                f"支持的格式: {supported}"
+                f"Unsupported file format: {ext}\n"
+                f"Supported formats: {supported}"
             )
         
-        print(f"  📄 检测到格式: {ext} -> 使用 {parser_class.__name__}")
+        print(f"  📄 Detected format: {ext} -> using {parser_class.__name__}")
         
         return parser_class(file_path)
     
     @staticmethod
     def get_supported_formats():
         """
-        获取支持的文件格式列表
+        Get list of supported file formats
         
         Returns:
-            支持的扩展名列表
+            List of supported extensions
         """
         return list(ParserFactory.PARSERS.keys())
     
     @staticmethod
     def is_supported(file_path: str) -> bool:
         """
-        检查文件格式是否支持
+        Check if file format is supported
         
         Args:
-            file_path: 文件路径
+            file_path: File path
             
         Returns:
-            是否支持该格式
+            Whether the format is supported
         """
         ext = Path(file_path).suffix.lower()
         return ext in ParserFactory.PARSERS
 
 
 def main():
-    """测试函数"""
+    """Test function"""
     import sys
     
     if len(sys.argv) < 2:
-        print("用法: python parser_factory.py <文件路径>")
-        print(f"\n支持的格式: {', '.join(ParserFactory.get_supported_formats())}")
+        print("Usage: python parser_factory.py <file_path>")
+        print(f"\nSupported formats: {', '.join(ParserFactory.get_supported_formats())}")
         return
     
     file_path = sys.argv[1]
     
     try:
-        # 自动创建解析器
+        # Automatically create parser
         parser = ParserFactory.create_parser(file_path)
         
-        # 解析文件
+        # Parse file
         data = parser.parse()
         
-        # 显示结果
-        print(f"\n✅ 解析成功:")
-        print(f"  - 文件: {data['metadata']['file_name']}")
-        print(f"  - 格式: {data['metadata']['file_format']}")
-        print(f"  - 大小: {data['metadata']['file_size_mb']} MB")
+        # Display results
+        print(f"\n✅ Parsing successful:")
+        print(f"  - File: {data['metadata']['file_name']}")
+        print(f"  - Format: {data['metadata']['file_format']}")
+        print(f"  - Size: {data['metadata']['file_size_mb']} MB")
         
         metrics = data['metrics']
         for key, value in metrics.items():
             print(f"  - {key}: {value}")
         
     except Exception as e:
-        print(f"\n❌ 错误: {e}")
+        print(f"\n❌ Error: {e}")
         return 1
 
 

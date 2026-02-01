@@ -1,10 +1,10 @@
 """
-智能文档工厂 - 主程序
+Smart Document Factory - Main Program
 
-功能：
-- 支持多种文档格式输入（Excel, CSV, Word, PDF）
-- 智能解析并生成 3 种风格的 PPT 方案
-- 自动格式检测
+Features:
+- Support multiple document format inputs (Excel, CSV, Word, PDF)
+- Intelligently parse and generate 3 PPT style options
+- Automatic format detection
 """
 
 import sys
@@ -12,7 +12,7 @@ from pathlib import Path
 import argparse
 from datetime import datetime
 
-# 添加 src 到路径
+# Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from parsers.parser_factory import ParserFactory
@@ -22,155 +22,155 @@ import pandas as pd
 
 def generate_reports(input_path: str, output_dir: str = 'data/output'):
     """
-    从任意格式文档生成多风格 PPT 报告
+    Generate multi-style PPT reports from any format document
     
-    支持格式: Excel (.xlsx, .xls), CSV (.csv), Word (.docx), PDF (.pdf)
+    Supported formats: Excel (.xlsx, .xls), CSV (.csv), Word (.docx), PDF (.pdf)
     
     Args:
-        input_path: 输入文件路径
-        output_dir: 输出目录
+        input_path: Input file path
+        output_dir: Output directory
     """
     print("=" * 60)
-    print("🚀 智能文档工厂 - 多格式支持版本")
+    print("🚀 Smart Document Factory - Multi-Format Support")
     print("=" * 60)
     
-    # 1. 自动检测并创建解析器
-    print(f"\n📖 正在解析文件: {input_path}")
+    # 1. Auto-detect and create parser
+    print(f"\n📖 Parsing file: {input_path}")
     
     try:
         parser = ParserFactory.create_parser(input_path)
     except ValueError as e:
         print(f"\n❌ {e}")
         supported = ', '.join(ParserFactory.get_supported_formats())
-        print(f"💡 提示: 支持的格式包括 {supported}")
+        print(f"💡 Tip: Supported formats include {supported}")
         return False
     
-    # 2. 解析数据
+    # 2. Parse data
     data = parser.parse()
     metadata = data['metadata']
     metrics = data['metrics']
     content = data['content']
     
-    print(f"✅ 解析完成:")
-    print(f"   - 文件格式: {metadata['file_format']}")
-    print(f"   - 文件大小: {metadata['file_size_mb']} MB")
+    print(f"✅ Parsing complete:")
+    print(f"   - File format: {metadata['file_format']}")
+    print(f"   - File size: {metadata['file_size_mb']} MB")
     
-    # 显示统计信息
+    # Display statistics
     for key, value in metrics.items():
         if isinstance(value, (int, float)):
             print(f"   - {key}: {value}")
     
-    # 3. 提取表格数据
+    # 3. Extract table data
     tables = content.get('tables', [])
     
     if not tables:
-        print("\n⚠️  警告: 未检测到表格数据")
-        print("💡 提示: 当前版本主要处理表格数据，纯文本文档支持即将推出")
+        print("\n⚠️  Warning: No table data detected")
+        print("💡 Tip: Current version mainly handles table data, plain text document support coming soon")
         return False
     
-    print(f"   - 检测到 {len(tables)} 个表格")
+    print(f"   - Detected {len(tables)} table(s)")
     
-    # 使用第一个表格生成 PPT
+    # Use first table to generate PPT
     df = tables[0]
-    print(f"   - 使用表格 1: {df.shape[0]} 行 x {df.shape[1]} 列")
+    print(f"   - Using table 1: {df.shape[0]} rows x {df.shape[1]} columns")
     
-    # 4. 生成三种风格的 PPT
+    # 4. Generate three styles of PPT
     styles = ['conservative', 'visual', 'detailed']
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     
-    print(f"\n🎨 正在生成 {len(styles)} 种风格的 PPT...")
+    print(f"\n🎨 Generating {len(styles)} PPT styles...")
     
     for style in styles:
-        print(f"\n  ⚙️  生成 {style} 风格...")
+        print(f"\n  ⚙️  Generating {style} style...")
         
         gen = PPTGenerator(style=style)
         
-        # 标题页 - 使用文件名而不是 sheet_name
+        # Title slide - use filename instead of sheet_name
         file_name = metadata['file_name']
-        title = f"数据分析报告 - {Path(file_name).stem}"
-        subtitle = f"{datetime.now().strftime('%Y年%m月')}"
+        title = f"Data Analysis Report - {Path(file_name).stem}"
+        subtitle = f"{datetime.now().strftime('%B %Y')}"
         
         gen.add_title_slide(title, subtitle)
         
-        # 数据概览页
+        # Data overview slide
         overview_data = pd.DataFrame({
-            '指标': ['数据来源', '总行数', '总列数', '格式类型'],
-            '数值': [
+            'Metric': ['Data Source', 'Total Rows', 'Total Columns', 'Format Type'],
+            'Value': [
                 metadata['file_format'].upper(),
                 metrics.get('row_count', len(df)),
                 metrics.get('column_count', len(df.columns)),
                 metadata['file_path'].split('.')[-1]
             ]
         })
-        gen.add_data_slide("数据概览", overview_data)
+        gen.add_data_slide("Data Overview", overview_data)
         
-        # 数据表格页（显示前几行）
+        # Data preview slide (show first few rows)
         if len(df) > 0:
-            gen.add_data_slide("数据预览", df.head(8))
+            gen.add_data_slide("Data Preview", df.head(8))
         
-        # 如果有数值数据，生成图表
+        # If there's numeric data, generate charts
         numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
         if numeric_cols:
-            # 选取前3个数值列
+            # Select first 3 numeric columns
             chart_cols = numeric_cols[:3]
             if chart_cols:
                 chart_data = {
                     'categories': chart_cols,
                     'series': {
-                        '平均值': [df[col].mean() for col in chart_cols],
-                        '最大值': [df[col].max() for col in chart_cols]
+                        'Average': [df[col].mean() for col in chart_cols],
+                        'Maximum': [df[col].max() for col in chart_cols]
                     }
                 }
-                gen.add_chart_slide("数值指标对比", chart_data, chart_type='bar')
+                gen.add_chart_slide("Numeric Metrics Comparison", chart_data, chart_type='bar')
         
-        # 保存文件
+        # Save file
         output_filename = f"report_{style}_{timestamp}.pptx"
         output_path = f"{output_dir}/{output_filename}"
         gen.save(output_path)
         
-        # 获取文件大小
+        # Get file size
         file_size = Path(output_path).stat().st_size
         file_size_kb = round(file_size / 1024, 2)
-        print(f"     ✅ 已生成: {output_filename} ({file_size_kb} KB)")
+        print(f"     ✅ Generated: {output_filename} ({file_size_kb} KB)")
     
     print("\n" + "=" * 60)
-    print("✨ 全部生成完成！")
-    print(f"📁 输出目录: {output_dir}")
+    print("✨ All generation complete!")
+    print(f"📁 Output directory: {output_dir}")
     print("=" * 60)
     
     return True
 
 
 def main():
-    """主函数"""
-    parser = argparse.ArgumentParser(description='智能文档工厂 - Excel 转 PPT')
+    """Main function"""
+    parser = argparse.ArgumentParser(description='Smart Document Factory - Excel to PPT')
     parser.add_argument(
         '--input',
         type=str,
         default='data/input/sample.xlsx',
-        help='输入 Excel 文件路径'
+        help='Input Excel file path'
     )
     parser.add_argument(
         '--output',
         type=str,
         default='data/output',
-        help='输出目录'
+        help='Output directory'
     )
     
     args = parser.parse_args()
     
-    # 检查输入文件
+    # Check input file
     if not Path(args.input).exists():
-        print(f"❌ 错误: 文件不存在 {args.input}")
-        print("\n💡 提示: 请先将 Excel 文件放到 data/input/ 目录")
+        print(f"❌ Error: File not found {args.input}")
+        print("\n💡 Tip: Please place the Excel file in data/input/ directory")
         return 1
     
-    # 生成报告
+    # Generate reports
     try:
         generate_reports(args.input, args.output)
         return 0
     except Exception as e:
-        print(f"\n❌ 错误: {e}")
+        print(f"\n❌ Error: {e}")
         import traceback
         traceback.print_exc()
         return 1

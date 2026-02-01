@@ -1,3 +1,5 @@
 """
-包初始化文件
+Generator Module
+
+Provides PowerPoint generation capabilities
 """
