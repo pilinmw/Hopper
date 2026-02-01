@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# 智能文档工厂 - GitHub 推送脚本
+
+echo "🚀 准备推送到 GitHub..."
+echo ""
+echo "📋 请按以下步骤操作："
+echo ""
+echo "1️⃣  在 GitHub 上创建新仓库"
+echo "   访问: https://github.com/new"
+echo "   仓库名: smart-doc-factory"
+echo "   描述: 🏭 通用文档智能转换平台 - 支持多格式输入，智能数据提炼，多风格输出"
+echo "   类型: Public (或 Private 根据需要)"
+echo "   ❌ 不要勾选 'Add a README file'"
+echo "   ❌ 不要勾选 'Add .gitignore'"
+echo "   ❌ 不要勾选 'Choose a license'"
+echo ""
+echo "2️⃣  创建完成后，运行以下命令："
+echo ""
+echo "   # 方式 1: 使用 HTTPS (推荐)"
+echo "   git remote add origin https://github.com/<你的用户名>/smart-doc-factory.git"
+echo "   git branch -M main"
+echo "   git push -u origin main"
+echo ""
+echo "   # 方式 2: 使用 SSH"
+echo "   git remote add origin git@github.com:<你的用户名>/smart-doc-factory.git"
+echo "   git branch -M main"
+echo "   git push -u origin main"
+echo ""
+echo "💡 提示: 将 <你的用户名> 替换为你的 GitHub 用户名"
+echo ""
+echo "📊 项目统计:"
+du -sh .
+echo ""
+find . -type f \( -name "*.py" -o -name "*.md" -o -name "*.txt" \) -exec wc -l {} + | tail -1 | awk '{print "   总代码行数: " $1 " 行"}'
+echo ""
+echo "✅ 本地提交已完成，等待推送到 GitHub"
