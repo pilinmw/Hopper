@@ -22,3 +22,4 @@ python-dateutil==2.8.2
 # 开发工具
 pytest==7.4.3
 black==23.11.0
+reportlab==4.0.7
