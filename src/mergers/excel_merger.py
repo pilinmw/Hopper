@@ -118,6 +118,11 @@ class ExcelMerger:
                         df.to_excel(writer, sheet_name=sheet_name, index=False)
                         sheet_count += 1
                         
+                        # Apply template if available
+                        if self.template_engine:
+                            worksheet = writer.sheets[sheet_name]
+                            self.template_engine.apply_to_worksheet(worksheet, has_header=True)
+                        
                         print(f"     → Sheet: '{sheet_name}' ({df.shape[0]} rows × {df.shape[1]} cols)")
                 
                 # Create summary sheet
