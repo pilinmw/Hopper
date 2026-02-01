@@ -6,7 +6,7 @@ Merge multiple document sources (Excel, CSV, Word, PDF) into a single Excel file
 
 import pandas as pd
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 import sys
 
@@ -14,15 +14,25 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from parsers.parser_factory import ParserFactory
+from cleaners.data_cleaner import DataCleaner, CleaningConfig
 
 
 class ExcelMerger:
     """Merge multiple document files into one Excel workbook"""
     
-    def __init__(self):
-        """Initialize the merger"""
+    def __init__(self, auto_clean: bool = False, cleaning_config: Optional[CleaningConfig] = None):
+        """
+        Initialize the merger
+        
+        Args:
+            auto_clean: Automatically clean data before merging
+            cleaning_config: Configuration for data cleaning
+        """
         self.sources = []  # List of parsed data from each file
         self.file_paths = []  # Original file paths
+        self.auto_clean = auto_clean
+        self.cleaning_config = cleaning_config or CleaningConfig()
+
         
     def add_file(self, file_path: str) -> bool:
         """
@@ -105,6 +115,12 @@ class ExcelMerger:
                     
                     # Write each table as a separate sheet
                     for table_idx, df in enumerate(tables):
+                        # Clean data if enabled
+                        if self.auto_clean:
+                            print(f"     🧹 Cleaning table {table_idx + 1}...")
+                            cleaner = DataCleaner(df, self.cleaning_config)
+                            df = cleaner.clean()
+                        
                         # Generate sheet name
                         if len(tables) == 1:
                             sheet_name = f"{file_name}"
