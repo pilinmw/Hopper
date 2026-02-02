@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from api.routes import upload_router, merge_router, download_router
+from api.routes.chat import router as chat_router
 from api.models.task import HealthResponse
 
 # Create FastAPI app
@@ -41,6 +42,7 @@ start_time = datetime.now()
 app.include_router(upload_router, prefix="/api/v1", tags=["Upload"])
 app.include_router(merge_router, prefix="/api/v1", tags=["Merge"])
 app.include_router(download_router, prefix="/api/v1", tags=["Download"])
+app.include_router(chat_router, prefix="/api/v1/chat", tags=["Chat"])
 
 
 @app.get("/", tags=["Root"])
