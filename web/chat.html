@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Document Factory - AI Chat</title>
+    <link rel="stylesheet" href="css/chat.css">
+</head>
+
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="header-content">
+                <h1>🤖 AI Data Analyst</h1>
+                <p class="subtitle">Upload data and chat to analyze</p>
+            </div>
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Main Chat Area -->
+        <div class="chat-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Upload Section -->
+                <div class="upload-card">
+                    <h3>📤 Upload Data</h3>
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">📁</div>
+                        <p>Drop file here</p>
+                        <button class="btn-upload" id="browseBtn">Browse</button>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.docx,.pdf" hidden>
+                    </div>
+                    <div id="fileInfo" class="file-info hidden"></div>
+                </div>
+
+                <!-- Data Summary -->
+                <div class="data-card hidden" id="dataCard">
+                    <h3>📊 Data Summary</h3>
+                    <div id="dataSummary"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions hidden" id="quickActions">
+                    <h3>⚡ Quick Actions</h3>
+                    <div id="actionButtons"></div>
+                </div>
+            </aside>
+
+            <!-- Chat Messages -->
+            <main class="chat-main">
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-message">
+                        <div class="welcome-icon">👋</div>
+                        <h2>Welcome to AI Data Analyst!</h2>
+                        <p>Upload a data file to get started. I can help you:</p>
+                        <ul>
+                            <li>Filter data by categories</li>
+                            <li>Create pivot tables</li>
+                            <li>Generate visualizations</li>
+                            <li>Export to PPT, PDF, Charts, Excel</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea id="messageInput" class="chat-input"
+                            placeholder="Type your message... (e.g., 'Show me only electronics')" rows="1"></textarea>
+                        <button class="btn-send" id="sendBtn" disabled>
+                            <span>Send</span>
+                            <span class="send-icon">📤</span>
+                        </button>
+                    </div>
+                    <div class="input-hint">
+                        💡 Try: "Filter by category", "Create pivot table", "Generate PPT"
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/chat-websocket.js"></script>
+    <script src="js/chat-ui.js"></script>
+    <script src="js/chat-app.js"></script>
+</body>
+
+</html>
