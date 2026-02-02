@@ -172,12 +172,35 @@ Respond in JSON format with:
                 needs_confirmation=parsed.get('needs_confirmation', False)
             )
             
+        except json.JSONDecodeError as e:
+            print(f"Error parsing OpenAI response: {e}")
+            # Fall back to simple response
+            return AgentResponse(
+                message="I understand your request. Let me process that for you.",
+                intent=self.extract_intent(user_message),
+                quick_actions=["Try again", "View help"]
+            )
         except Exception as e:
             print(f"Error calling OpenAI API: {e}")
-            return AgentResponse(
-                message=f"Sorry, I encountered an error: {str(e)}",
-                quick_actions=["Try Again", "View Documentation"]
-            )
+            # Provide helpful error message
+            error_msg = str(e)
+            if "API key" in error_msg or "authentication" in error_msg.lower():
+                return AgentResponse(
+                    message="⚠️ OpenAI API key is invalid or missing. Please check your .env configuration.",
+                    quick_actions=["View documentation"]
+                )
+            elif "rate limit" in error_msg.lower():
+                return AgentResponse(
+                    message="⚠️ API rate limit exceeded. Please wait a moment and try again.",
+                    quick_actions=["Try again"]
+                )
+            else:
+                # Use fallback intent extraction
+                return AgentResponse(
+                    message=f"I'll help you with that using local processing.",
+                    intent=self.extract_intent(user_message),
+                    quick_actions=["Continue", "Try again"]
+                )
     
     def extract_intent(self, message: str) -> Intent:
         """
